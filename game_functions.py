@@ -4,13 +4,6 @@ from bullet import Bullet
 from alien import Alien
 
 
-def fire_bullet(settings, screen, ship, bullets):
-    """Check if the bullets group is full, if not, create/fire new bullet"""
-    if len(bullets) < settings.max_bullets:
-        new_bullet = Bullet(settings, screen, ship)
-        bullets.add(new_bullet)
-
-
 def check_keydown_events(event, settings, screen, ship, bullets):
     """Check all keydown events"""
     if event.key == pygame.K_RIGHT:
@@ -42,6 +35,13 @@ def check_events(settings, screen, ship, bullets):
             check_keyup_events(event, ship)
 
 
+def fire_bullet(settings, screen, ship, bullets):
+    """Check if the bullets group is full, if not, create/fire new bullet"""
+    if len(bullets) < settings.max_bullets:
+        new_bullet = Bullet(settings, screen, ship)
+        bullets.add(new_bullet)
+
+
 def update_bullets(bullets):
     """Check if bullets have left the screen, destroy if so"""
     bullets.update(bullets)
@@ -66,8 +66,8 @@ def get_number_aliens_x(settings, alien_width):
 
 def create_alien(screen, settings, aliens, alien_number, row_number):
     """Create a new alien and add it to the aliens group"""
-    alien = Alien(settings, screen)
-    alien_width= alien.rect.width
+    alien = Alien(screen, settings)
+    alien_width = alien.rect.width
     alien.x = alien_width + 2 * alien_width * alien_number
     alien.rect.x = alien.x
     alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number
@@ -83,6 +83,31 @@ def create_fleet(settings, screen, aliens, ship):
     for row_number in range(number_rows):
         for alien_number in range(number_aliens_x):
             create_alien(screen, settings, aliens, alien_number, row_number)
+
+
+def check_fleet_edges(settings, aliens):
+    """Respond appropriately if any alien has reached the edge"""
+    for alien in aliens.sprites():
+        if alien.check_edges():
+            change_fleet_direction(settings, aliens)
+            break
+
+
+def change_fleet_direction(settings, aliens):
+    """Change the direction of each alien in the fleet"""
+    for alien in aliens.sprites():
+        alien.rect.y += settings.fleet_drop_speed
+    settings.fleet_direction *= -1
+
+
+def update_aliens(settings, aliens):
+    """Check if an alien is at the edge, then update all aliens positions"""
+    check_fleet_edges(settings, aliens)
+    aliens.update()
+
+
+def check_loss_conditions(screen, settings, aliens, ship):
+
 
 
 def update_screen(settings, screen, ship, aliens, bullets):

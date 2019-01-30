@@ -24,9 +24,11 @@ class AlienInvasionGame:
             gf.check_events(self.settings, self.screen, self.ship, self.bullets)
             self.ship.update()
             gf.update_bullets(self.bullets)
+            gf.update_aliens(self.settings, self.aliens)
             gf.update_screen(self.settings, self.screen, self.ship, self.aliens, self.bullets)
 
 
 if __name__ == "__main__":
     newgame = AlienInvasionGame()
     newgame.run_game()
+
