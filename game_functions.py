@@ -42,12 +42,22 @@ def fire_bullet(settings, screen, ship, bullets):
         bullets.add(new_bullet)
 
 
-def update_bullets(bullets):
+def check_bullet_alien_collisions(settings, screen, aliens, ship, bullets):
+    collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
+    if len(aliens) == 0:
+        bullets.empty()
+        create_fleet(settings, screen, aliens, ship)
+
+
+def update_bullets(settings, screen, ship,  aliens, bullets):
     """Check if bullets have left the screen, destroy if so"""
     bullets.update(bullets)
     for bullet in bullets.copy():
         if bullet.rect.bottom <= 0:
             bullets.remove(bullet)
+
+    check_bullet_alien_collisions(settings, screen, aliens, ship, bullets)
+
 
 
 def get_number_rows_y(settings, alien_height, ship_height):
@@ -106,10 +116,6 @@ def update_aliens(settings, aliens):
     aliens.update()
 
 
-def check_loss_conditions(screen, settings, aliens, ship):
-
-
-
 def update_screen(settings, screen, ship, aliens, bullets):
     """
     Update images on the screen and flip to the new screen
@@ -125,6 +131,9 @@ def update_screen(settings, screen, ship, aliens, bullets):
     ship.blitme()
     aliens.draw(screen)
     pygame.display.flip()
+
+
+
 
 
 
