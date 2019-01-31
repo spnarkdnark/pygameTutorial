@@ -1,4 +1,5 @@
 import sys
+from time import sleep
 import pygame
 from bullet import Bullet
 from alien import Alien
@@ -59,7 +60,6 @@ def update_bullets(settings, screen, ship,  aliens, bullets):
     check_bullet_alien_collisions(settings, screen, aliens, ship, bullets)
 
 
-
 def get_number_rows_y(settings, alien_height, ship_height):
     """Calculate how many rows of aliens will be spawned per fleet"""
     available_space_y = settings.screen_height - (alien_height*3) - ship_height
@@ -110,10 +110,41 @@ def change_fleet_direction(settings, aliens):
     settings.fleet_direction *= -1
 
 
-def update_aliens(settings, aliens):
+def ship_hit(settings, stats, screen, ship, aliens, bullets):
+    """Respond appropriately to a ship being hit by an alien"""
+    if stats.ships_left > 0:
+        stats.ships_left -= 1
+
+        aliens.empty()
+        bullets.empty()
+
+        create_fleet(settings, screen, aliens, ship)
+        ship.center_ship()
+        sleep(0.5)
+
+    else:
+        aliens.empty()
+        bullets.empty()
+        stats.gameActive = False
+
+
+def check_aliens_bottom(settings, stats, screen, ship, aliens, bullets):
+    """Respond appropriately to any alien striking the bottom of the screen"""
+    screen_rect = screen.get_rect()
+    for alien in aliens.sprites():
+        if alien.rect.bottom >= screen_rect.bottom:
+            ship_hit(settings, stats, screen, ship, aliens, bullets)
+            break
+
+
+def update_aliens(settings, stats, screen, aliens, ship, bullets):
     """Check if an alien is at the edge, then update all aliens positions"""
     check_fleet_edges(settings, aliens)
+    check_aliens_bottom(settings, stats, screen, ship, aliens, bullets)
     aliens.update()
+
+    if pygame.sprite.spritecollideany(ship, aliens):
+        ship_hit(settings, stats, screen, ship, aliens, bullets)
 
 
 def update_screen(settings, screen, ship, aliens, bullets):
@@ -123,6 +154,7 @@ def update_screen(settings, screen, ship, aliens, bullets):
     :param screen: screen objects
     :param ship: ship object
     :param bullets: the list of bullets in AlienInvasionGame
+    :param aliens: the group of aliens
     :return: nothing - updates the view of the screen
     """
     screen.fill(settings.bg_color)
