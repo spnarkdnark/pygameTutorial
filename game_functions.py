@@ -25,7 +25,7 @@ def check_keyup_events(event, ship):
         ship.moving_left = False
 
 
-def check_events(settings, screen, ship, bullets):
+def check_events(settings, screen, stats, play_button, ship, aliens, bullets):
     """respond to key presses and game events"""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -34,6 +34,23 @@ def check_events(settings, screen, ship, bullets):
             check_keydown_events(event, settings, screen, ship, bullets)
         elif event.type == pygame.KEYUP:
             check_keyup_events(event, ship)
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            check_play_button(settings, screen, stats, play_button, ship, aliens, bullets, mouse_x, mouse_y)
+
+
+def check_play_button(settings, screen, stats, play_button, ship, aliens, bullets, mouse_x, mouse_y):
+    if play_button.rect.collidepoint(mouse_x, mouse_y):
+        reset_game(settings, screen, stats, ship, aliens, bullets)
+
+
+def reset_game(settings, screen, stats, ship, aliens, bullets):
+    stats.reset_stats()
+    stats.gameActive = True
+    aliens.empty()
+    bullets.empty()
+    create_fleet(settings, screen, aliens, ship)
+    ship.center_ship()
 
 
 def fire_bullet(settings, screen, ship, bullets):
@@ -123,8 +140,6 @@ def ship_hit(settings, stats, screen, ship, aliens, bullets):
         sleep(0.5)
 
     else:
-        aliens.empty()
-        bullets.empty()
         stats.gameActive = False
 
 
@@ -147,7 +162,7 @@ def update_aliens(settings, stats, screen, aliens, ship, bullets):
         ship_hit(settings, stats, screen, ship, aliens, bullets)
 
 
-def update_screen(settings, screen, ship, aliens, bullets):
+def update_screen(settings, stats, screen, ship, aliens, bullets, play_button):
     """
     Update images on the screen and flip to the new screen
     :param settings: game settings imported from settings.py
@@ -162,6 +177,8 @@ def update_screen(settings, screen, ship, aliens, bullets):
         bullet.draw_bullet()
     ship.blitme()
     aliens.draw(screen)
+    if not stats.gameActive:
+        play_button.draw_button()
     pygame.display.flip()
 
 
